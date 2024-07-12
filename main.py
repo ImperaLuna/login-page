@@ -18,22 +18,28 @@ def get():
         Button("Login with HuggingFace", onclick=f"window.location.href = '{huggingface_url}';")
     )
 
+
 @rt("/callback", methods=["GET"])
-def     callback(request):
+def callback(request):
     code = request.query_params.get("code")
     state = request.query_params.get("state")
 
-    if 'scope' in request.query_params:
-        client = google_client
-        provider = 'google'
-    elif 'state' in request.query_params:
+    if 'state' in request.query_params:
         client = huggingface_client
         provider = 'huggingface'
+    elif 'scope' in request.query_params:
+        client = google_client
+        provider = 'google'
     else:
         client = github_client
         provider = 'github'
 
-    user_info = client.retr_info(code)
+    try:
+        user_info = client.retr_info(code)
+    except Exception as e:
+        error_message = str(e)
+        print(f"Error occurred: {error_message}")
+        return f"An error occurred: {error_message}"
 
     if provider == 'github':
         user_name = user_info.get("login")

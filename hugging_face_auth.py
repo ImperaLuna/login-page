@@ -1,4 +1,6 @@
 import requests
+from urllib.parse import quote
+import secrets
 
 class HuggingFaceClient:
     def __init__(self, client_id, client_secret, redirect_uri):
@@ -10,7 +12,8 @@ class HuggingFaceClient:
         self.userinfo_url = "https://huggingface.co/oauth/userinfo"
 
     def login_link(self):
-        return f"{self.auth_url}?client_id={self.client_id}&redirect_uri={self.redirect_uri}&response_type=code"
+        state = secrets.token_urlsafe(16)  # Generate a random state
+        return f"{self.auth_url}?client_id={self.client_id}&redirect_uri={quote(self.redirect_uri)}&response_type=code&state={state}"
 
     def get_access_token(self, code):
         data = {
